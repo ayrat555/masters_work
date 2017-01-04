@@ -7,6 +7,7 @@ defmodule Preprocessor do
   def read do
     datasets = for data_path <- @files, do: read_data(data_path)
     :ok = datasets |> validate_correspondance
+    datasets |> merge_datasets
   end
 
   defp read_data(path) do
@@ -54,6 +55,22 @@ defmodule Preprocessor do
     else
       :error
     end
+  end
+
+  defp merge_datasets(datasets) do
+    {communities, _, _} = datasets |> Enum.at(0)
+
+    merged_values = 
+      datasets
+      |> Enum.map(fn {_, _, dataset_values} -> dataset_values end)
+      |> Enum.reduce(fn dataset_values, acc -> acc ++ dataset_values end)
+
+    merged_column_names =
+      datasets
+      |> Enum.map(fn {_, column_names, _} -> column_names end)
+      |> Enum.reduce(fn column_names, acc -> acc ++ column_names end)
+
+    {communities, merged_column_names, merged_values}
   end
 
   # defp validate_correspondance(first_list, second_list) do
