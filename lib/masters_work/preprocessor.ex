@@ -1,4 +1,4 @@
-defmodule Preprocessor do
+defmodule MastersWork.Preprocessor do
   def read(dataset_paths) do
     datasets = for data_path <- dataset_paths, do: read_data(data_path)
     :ok = datasets |> validate_correspondance
@@ -6,7 +6,7 @@ defmodule Preprocessor do
   end
 
   defp read_data(path) do
-    path = Path.join([__DIR__, path]) 
+    path = Path.join([__DIR__, "../..", path]) 
     csv_lines = File.stream!(path) |> CSV.decode
     column_names = csv_lines |> Enum.at(0) |> Enum.slice(5..-1)
     [ _ | data] = csv_lines |> Enum.to_list
