@@ -6,7 +6,7 @@ defmodule MastersWork.Preprocessor do
   end
 
   defp read_data(path) do
-    path = Path.join([__DIR__, "../..", path]) 
+    path = Path.join([__DIR__, "../..",  path]) 
     csv_lines = File.stream!(path) |> CSV.decode
     column_names = csv_lines |> Enum.at(0) |> Enum.slice(5..-1)
     [ _ | data] = csv_lines |> Enum.to_list
@@ -18,27 +18,21 @@ defmodule MastersWork.Preprocessor do
 
   defp validate_correspondance(datasets) do
     {communities, _, _} = datasets |> Enum.at(0)
-    [remaining_datasets | _] = datasets
-    
+    [_ | remaining_datasets] = datasets
+  
     _validate_correspondance(remaining_datasets, communities)
   end
 
-  defp _validate_correspondance(datasets, first_communities) when is_list(datasets) do
-    if Enum.all?(datasets, fn [cur_communities | _] -> cur_communities == first_communities end) do
+  defp _validate_correspondance(datasets, first_communities) do
+    datasets = unless is_list(datasets), do: Enum.to_list(datasets), else: datasets
+
+    if Enum.all?(datasets, fn {cur_communities, _, _} -> cur_communities == first_communities end) do
       :ok
     else
       :error
     end
   end
 
-  defp _validate_correspondance(dataset, first_communities) do
-    {communities, _, _} = dataset
-    if communities == first_communities do
-      :ok
-    else
-      :error
-    end
-  end
 
   defp merge_datasets(datasets) do
     {communities, _, _} = datasets |> Enum.at(0)
