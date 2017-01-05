@@ -17,6 +17,12 @@ defmodule MastersWork do
       |> Enum.each(fn(measure) -> Matrix.matrix(values, measure: measure) 
                                   |> Postprocessor.write(@proximity_matrix_output <> "#{measure}.csv") 
                     end)
+    calculate_clusters
+  end
 
+  defp calculate_clusters do
+    script_path = Path.join([__DIR__, "../data/r_scripts/clusterisation.r"]) 
+
+    System.cmd(script_path, [])
   end
 end
