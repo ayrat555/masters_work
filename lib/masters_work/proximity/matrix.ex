@@ -10,6 +10,10 @@ defmodule MastersWork.Proximity.Matrix do
     dataset |> Enum.map(&measure_vector_proximity(community_values, &1, measure))
   end
 
+  defp measure_vector_proximity(vector1, vector2, measure) when vector1 == vector2 do
+    0
+  end
+
   defp measure_vector_proximity(vector1, vector2, measure) do
     VectorParams.params(vector1, vector2) |> Measure.proximity(measure: measure)
   end

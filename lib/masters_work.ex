@@ -2,6 +2,7 @@ defmodule MastersWork do
   alias MastersWork.Preprocessor
   alias MastersWork.Postprocessor
   alias MastersWork.Proximity.Matrix
+  alias MastersWork.Cluster.GapStat
 
   @input_datasets [
                     "data/input/phonetics_vowels.csv",
@@ -17,12 +18,7 @@ defmodule MastersWork do
       |> Enum.each(fn(measure) -> Matrix.matrix(values, measure: measure) 
                                   |> Postprocessor.write(@proximity_matrix_output <> "#{measure}.csv") 
                     end)
-    calculate_clusters
-  end
-
-  defp calculate_clusters do
-    script_path = Path.join([__DIR__, "../data/r_scripts/clusterisation.r"]) 
-
-    System.cmd(script_path, [])
+    optimal_number_of_clusters = GapStat.calculate("proximity_matrix1.csv", 10)
+    MastersWork.Cluster.Clusterisation.calculate_clusters("proximity_matrix1.csv", optimal_number_of_clusters)
   end
 end
