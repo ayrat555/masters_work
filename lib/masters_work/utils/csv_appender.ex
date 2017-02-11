@@ -1,5 +1,8 @@
-defmodule MastersWork.Helpers.CsvAppender do
-  def create_legend_csv(input_legend_path, output_csv_path) do
+defmodule MastersWork.Utils.CsvAppender do
+  @input_legend_path "data/input/morphology_legend.txt"
+  @output_csv_path "data/input/morphology_legend.csv"
+
+  def create_legend_csv(input_legend_path \\ @input_legend_path, output_csv_path \\ @output_csv_path) do
     input_legend_path
     |> preprocess
     |> write_to_file(output_csv_path)
@@ -10,7 +13,6 @@ defmodule MastersWork.Helpers.CsvAppender do
     |> File.stream!
     |> Enum.map(fn(line) -> line |> clean_line end)
     |> form_lines
-    |> IO.inspect
     |> Enum.map(fn(line) -> line |> csv_line end)
     |> Enum.join("\n")
   end
@@ -35,6 +37,7 @@ defmodule MastersWork.Helpers.CsvAppender do
   defp form_lines([head|[]], accumulator, result) do
     accumulator = accumulator ++ [head]
     result ++ [accumulator]
+    |> Enum.reject(fn(el) -> el |> Enum.empty? end)
   end
 
   defp form_lines([head|tail], accumulator, result) do
@@ -49,7 +52,7 @@ defmodule MastersWork.Helpers.CsvAppender do
   end
 
   defp integer?(string) do
-    magic = 69
+    magic = 68
     case Integer.parse(string) do
       {int, ""} -> if int > magic, do: true, else: false
       _ -> false
