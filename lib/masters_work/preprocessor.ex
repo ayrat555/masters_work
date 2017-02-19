@@ -1,8 +1,12 @@
 defmodule MastersWork.Preprocessor do
-  def read(dataset_paths) do
+  def read(dataset_paths) when is_list(dataset_paths) do
     datasets = for data_path <- dataset_paths, do: read_data(data_path)
     :ok = datasets |> validate_correspondance
     datasets |> merge_datasets
+  end
+
+  def read(dataset_path) do
+    read_data(dataset_path)
   end
 
   defp read_data(path) do
