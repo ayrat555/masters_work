@@ -1,16 +1,18 @@
-defmodule MastersWork.Phonetics.Base do
+defmodule  MastersWork.Phonetics.Base do
   alias MastersWork.Preprocessor
   alias MastersWork.Helpers.Levenshtein
 
   @input_path "data/input/morphology.csv"
   @input_legend_path "data/input/morphology_legend_revised.csv"
+  @output_matrix_path "data/output/morphology_matrix_levenshtein.csv"
 
   def execute do
     {communities, column_names, values} = Preprocessor.read(@input_path)
     columns = column_names |> columns
     legend = parse_legend
+
     distance_matrix(values, columns, legend)
-  #  {values, columns, legend}
+    |> MastersWork.Postprocessor.write(@output_matrix_path)
   end
 
   def parse_legend do
@@ -30,12 +32,15 @@ defmodule MastersWork.Phonetics.Base do
 
   def distance_matrix(data, columns, legend) do
     data
-    |> Enum.map(fn(val1) ->
+    |> Enum.with_index
+    |> Enum.map(fn({val1, ind}) ->
+      IO.inspect ind
       atr1 = attributes(val1, columns, legend)
       data
       |> Enum.map(fn(val2) ->
         atr2 = attributes(val2, columns, legend)
-        distance(atr1, atr2)
+        dist = distance(atr1, atr2)
+        Enum.sum(dist) / Enum.count(atr2)
       end)
     end)
   end
