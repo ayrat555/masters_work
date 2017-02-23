@@ -7,9 +7,10 @@ defmodule MastersWork.Phonetics.Base do
 
   def execute do
     {communities, column_names, values} = Preprocessor.read(@input_path)
-    data = form_data(communities, values)
     columns = column_names |> columns
     legend = parse_legend
+    distance_matrix(values, columns, legend)
+  #  {values, columns, legend}
   end
 
   def parse_legend do
@@ -20,12 +21,6 @@ defmodule MastersWork.Phonetics.Base do
     end
   end
 
-  def form_data(communities, values)  do
-    community_with_values = for community <- communities, community_values <- values do
-      {community, community_values}
-    end
-  end
-
   def columns(column_names) do
     for col <- column_names do
       {int, _} = col |> String.replace("Карта", "") |> String.trim |> Integer.parse
@@ -33,15 +28,52 @@ defmodule MastersWork.Phonetics.Base do
     end
   end
 
-  def attrinute_distance(["nil"], ["nil"]) do
+  def distance_matrix(data, columns, legend) do
+    data
+    |> Enum.map(fn(val1) ->
+      atr1 = attributes(val1, columns, legend)
+      data
+      |> Enum.map(fn(val2) ->
+        atr2 = attributes(val2, columns, legend)
+        leven_dist = distance(atr1, atr2)
+        Enum.sum(leven_dist) / Enum.count(atr2)
+        |> IO.inspect
+      end)
+    end)
+  end
+
+  def attributes(values, columns, legend) do
+    values
+    |> Enum.with_index
+    |> Enum.map(fn({el, ind}) ->
+      column = columns |> Enum.at(ind)
+      attributes1 = legend |> Enum.find_value(fn({col, val, attributes}) -> if (col == column) && (val == el), do: attributes end)
+    end)
+    |> Enum.reject(fn(el) -> is_nil(el) end)
+  end
+
+  def distance(attr1, attr2) do
+    attr1
+    |> Enum.with_index
+    |> Enum.map(fn({el, ind}) ->
+      el1 =attr2 |> Enum.at(ind)
+      attribute_distance(el,el1)
+    end)
+  end
+
+  def attribute_distance(val, val) do
     0
   end
 
-  def attrinute_distance(attribute1, ["nil"]) do
+  def attribute_distance(["nil"], ["nil"]) do
+    0
+  end
+
+  def attribute_distance(attribute1, ["nil"]) do
     attribute1 |> Enum.count
   end
 
-  def attrinute_distance(["nil"], attribute2) do
+  def attribute_distance(["nil"], attribute2) do
     attribute2 |> Enum.count
   end
 
@@ -49,8 +81,10 @@ defmodule MastersWork.Phonetics.Base do
     distances =
       attribute1
       |> Enum.map(fn(word1) ->
+        word1 = word1 |> to_charlist
         attribute2
         |> Enum.map(fn(word2) ->
+          word2 = word2 |> to_charlist
           Levenshtein.distance(word1, word2)
         end)
         |> List.delete(0)
