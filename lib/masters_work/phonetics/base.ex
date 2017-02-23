@@ -35,9 +35,7 @@ defmodule MastersWork.Phonetics.Base do
       data
       |> Enum.map(fn(val2) ->
         atr2 = attributes(val2, columns, legend)
-        leven_dist = distance(atr1, atr2)
-        Enum.sum(leven_dist) / Enum.count(atr2)
-        |> IO.inspect
+        distance(atr1, atr2)
       end)
     end)
   end
