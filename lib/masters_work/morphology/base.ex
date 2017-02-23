@@ -1,6 +1,7 @@
-defmodule  MastersWork.Phonetics.Base do
+defmodule  MastersWork.Morphology.Base do
   alias MastersWork.Preprocessor
   alias MastersWork.Helpers.Levenshtein
+  alias MastersWork.Postprocessor
 
   @input_path "data/input/morphology.csv"
   @input_legend_path "data/input/morphology_legend_revised.csv"
@@ -12,7 +13,8 @@ defmodule  MastersWork.Phonetics.Base do
     legend = parse_legend
 
     distance_matrix(values, columns, legend)
-    |> MastersWork.Postprocessor.write(@output_matrix_path)
+    |> normalize_matrix
+    |> Postprocessor.write(@output_matrix_path)
   end
 
   def parse_legend do
@@ -61,6 +63,30 @@ defmodule  MastersWork.Phonetics.Base do
     |> Enum.map(fn({el, ind}) ->
       el1 =attr2 |> Enum.at(ind)
       attribute_distance(el,el1)
+    end)
+  end
+
+  def normalize_matrix(matrix) do
+    min =
+    matrix
+    |> Enum.map(fn(row) ->
+      row |> Enum.min
+    end)
+    |> Enum.min
+
+    max =
+    matrix
+    |> Enum.map(fn(row) ->
+      row |> Enum.max
+    end)
+    |> Enum.max
+
+    matrix
+    |> Enum.map(fn(row) ->
+      row
+      |> Enum.map(fn(el) ->
+        (el - min)/(max - min)
+      end)
     end)
   end
 
