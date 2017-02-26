@@ -12,3 +12,5 @@ x<-read.table(proximity_matrix_file,sep=',',dec=',',nrows=273,header=F)
 p<-pam(x,number_of_clusters,diss=T)
 clus<-p$clustering
 clusplot(x,clus,shade=T)
+
+print(clus, method = "Tibs2001SEmax")

@@ -8,6 +8,24 @@ defmodule MastersWork.Cluster.Clusterisation do
       ]
 
 
-    System.cmd(script_path, params)
+    {result, 0} = System.cmd(script_path, params)
+    result |> parse_result
+  end
+
+  defp parse_result(result) do
+    result
+    |> String.split("\n")
+    |> Enum.with_index
+    |> Enum.reject(fn({_el, ind}) ->
+      ind |> rem(2) != 1
+    end)
+    |> Enum.map(fn({el, _ind}) ->
+      el |> String.split(" ")
+    end)
+    |> List.flatten
+    |> Enum.reject(fn(el) ->
+      el == ""
+    end)
+    |> Enum.map(&String.to_integer(&1))
   end
 end
