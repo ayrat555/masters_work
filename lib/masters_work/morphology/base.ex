@@ -2,19 +2,34 @@ defmodule  MastersWork.Morphology.Base do
   alias MastersWork.Preprocessor
   alias MastersWork.Helpers.Levenshtein
   alias MastersWork.Postprocessor
+  alias MastersWork.Cluster.GapStat
+  alias MastersWork.Cluster.Clusterisation
 
   @input_path "data/input/morphology.csv"
   @input_legend_path "data/input/morphology_legend_revised.csv"
   @output_matrix_path "data/output/morphology_matrix_levenshtein.csv"
 
-  def execute do
-    {communities, column_names, values} = Preprocessor.read(@input_path)
-    columns = column_names |> columns
-    legend = parse_legend
+  def create_dissimilarity_matrix do
+    {values, columns, legend, _} = parse_initial_data
 
     distance_matrix(values, columns, legend)
     |> normalize_matrix
     |> Postprocessor.write(@output_matrix_path)
+  end
+
+  def classify_communities(number_of_clusters \\ 10) do
+    file_name = "morphology_matrix_levenshtein.csv"
+    optimal_number_of_clusters = GapStat.calculate(file_name, number_of_clusters) |> IO.inspect
+
+    Clusterisation.calculate_clusters(file_name, optimal_number_of_clusters)
+  end
+
+  def parse_initial_data do
+    {communities, column_names, values} = Preprocessor.read(@input_path)
+    columns = column_names |> columns
+    legend = parse_legend
+
+    {values, columns, legend, communities}
   end
 
   def parse_legend do
@@ -52,7 +67,7 @@ defmodule  MastersWork.Morphology.Base do
     |> Enum.with_index
     |> Enum.map(fn({el, ind}) ->
       column = columns |> Enum.at(ind)
-      attributes1 = legend |> Enum.find_value(fn({col, val, attributes}) -> if (col == column) && (val == el), do: attributes end)
+      legend |> Enum.find_value(fn({col, val, attributes}) -> if (col == column) && (val == el), do: attributes end)
     end)
     |> Enum.reject(fn(el) -> is_nil(el) end)
   end
