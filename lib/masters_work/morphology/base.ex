@@ -18,7 +18,7 @@ defmodule  MastersWork.Morphology.Base do
     |> Postprocessor.write(@output_matrix_path)
   end
 
-  def classify_communities(number_of_clusters \\ 3) do
+  def classify_communities(number_of_clusters \\ 2) do
     file_name = "morphology_matrix_levenshtein.csv"
     optimal_number_of_clusters = GapStat.calculate(file_name, number_of_clusters) |> IO.inspect
 
@@ -31,6 +31,26 @@ defmodule  MastersWork.Morphology.Base do
     legend = parse_legend
 
     {values, columns, legend, communities}
+  end
+
+  def check_with_expert_data do
+    cluster_result = classify_communities |> IO.inspect
+    expert_result = expert_data_result |> IO.inspect
+
+    correct_guesses =
+      cluster_result
+      |> Enum.with_index
+      |> Enum.map(fn({el, index}) ->
+        expert = expert_result |> Enum.at(index)
+        case expert do
+          ^el -> 1
+          _ -> 0
+        end
+      end)
+      |> Enum.reject(fn(el) -> el == 0 end)
+      |> Enum.count
+
+    correct_guesses / Enum.count(expert_result)
   end
 
   def parse_legend do
@@ -106,7 +126,9 @@ defmodule  MastersWork.Morphology.Base do
     end)
   end
 
-  def expert_data_result(communities) do
+  def expert_data_result do
+    {communities, _, _} = Preprocessor.read(@input_path)
+
     expert_data =
       Path.wildcard(@expert_data_path)
       |> Enum.map(fn(path) -> path |> File.read! end)
