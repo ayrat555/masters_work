@@ -8,6 +8,7 @@ defmodule  MastersWork.Morphology.Base do
   @input_path "data/input/morphology.csv"
   @input_legend_path "data/input/morphology_legend_revised.csv"
   @output_matrix_path "data/output/morphology_matrix_levenshtein.csv"
+  @expert_data_path "data/input/expert_data/*"
 
   def create_dissimilarity_matrix do
     {values, columns, legend, _} = parse_initial_data
@@ -17,7 +18,7 @@ defmodule  MastersWork.Morphology.Base do
     |> Postprocessor.write(@output_matrix_path)
   end
 
-  def classify_communities(number_of_clusters \\ 10) do
+  def classify_communities(number_of_clusters \\ 3) do
     file_name = "morphology_matrix_levenshtein.csv"
     optimal_number_of_clusters = GapStat.calculate(file_name, number_of_clusters) |> IO.inspect
 
@@ -102,6 +103,26 @@ defmodule  MastersWork.Morphology.Base do
       |> Enum.map(fn(el) ->
         (el - min)/(max - min)
       end)
+    end)
+  end
+
+  def expert_data_result(communities) do
+    expert_data =
+      Path.wildcard(@expert_data_path)
+      |> Enum.map(fn(path) -> path |> File.read! end)
+
+    communities
+    |> Enum.map(fn({_, community_name}) ->
+      expert_data
+      |> Enum.find_index(fn(data) ->
+        case :binary.match(data, community_name)  do
+          {_, _} -> true
+          :nomatch -> false
+         end
+      end)
+    end)
+    |> Enum.map(fn(cluster) ->
+      cluster + 1
     end)
   end
 
