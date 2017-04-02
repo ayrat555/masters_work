@@ -1,21 +1,24 @@
 defmodule MastersWork.Helpers.Levenshtein do
-  def first_letter_check(one_letter, two_letter) do
-    case one_letter == two_letter do
-      true -> 0
-      false -> 1
+  def distance(a, b), do: distance(a, b, HashDict.new) |> elem(0)
+  def distance(a, [] = b, cache), do: store_result({a, b}, length(a), cache)
+  def distance([] = a, b, cache), do: store_result({a, b}, length(b), cache)
+  def distance([x | rest1], [x | rest2], cache) do
+    distance(rest1, rest2, cache)
+  end
+  def distance([_ | rest1] = a, [_ | rest2] = b, cache) do
+    case Dict.has_key?(cache, {a, b}) do
+      true -> {Dict.get(cache, {a, b}), cache}
+      false ->
+        {l1, c1} = distance(a, rest2, cache)
+        {l2, c2} = distance(rest1, b, c1)
+        {l3, c3} = distance(rest1, rest2, c2)
+
+        min = :lists.min([l1, l2, l3]) + 1
+        store_result({a, b}, min, c3)
     end
   end
 
-  def distance(string_1, string_1), do: 0
-  def distance(string, ''), do: :string.len(string)
-  def distance('', string), do: :string.len(string)
-  def distance([h1|rest1], [h2|rest2]) do
-    cost = first_letter_check(h1, h2)
-
-    :lists.min([
-      distance(rest1, [h2|rest2]) + 1,
-      distance([h1|rest1], rest2) + 1,
-      distance(rest1, rest2) + cost
-    ])
+  defp store_result(key, result, cache) do
+    {result, Dict.put(cache, key, result)}
   end
 end
