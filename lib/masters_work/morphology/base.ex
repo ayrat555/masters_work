@@ -35,15 +35,14 @@ defmodule MastersWork.Morphology.Base do
     {values, columns, legend, communities}
   end
 
-  def check_with_expert_data do
+  def check_with_expert_data(subset \\ nil) do
     cluster_result = classify_communities |> IO.inspect
-    expert_result = expert_data_result |> IO.inspect
+    expert_result = expert_data_result(subset) |> IO.inspect
 
     correct_guesses =
-      cluster_result
-      |> Enum.with_index
+      expert_result
       |> Enum.map(fn({el, index}) ->
-        expert = expert_result |> Enum.at(index)
+        expert = cluster_result |> Enum.at(index)
         case expert do
           ^el -> 1
           _ -> 0
@@ -70,14 +69,14 @@ defmodule MastersWork.Morphology.Base do
     end
   end
 
-  def expert_data_result do
+  def expert_data_result(subset) do
     {communities, _, _} = Preprocessor.read(@input_path)
 
     expert_data =
       Path.wildcard(@expert_data_path)
       |> Enum.map(fn(path) -> path |> File.read! end)
 
-    communities
+    result = communities
     |> Enum.map(fn({_, community_name}) ->
       expert_data
       |> Enum.find_index(fn(data) ->
@@ -90,5 +89,9 @@ defmodule MastersWork.Morphology.Base do
     |> Enum.map(fn(cluster) ->
       cluster + 1
     end)
+    |> Enum.with_index
+
+    if subset |> is_nil, do: result, else: result |> Enum.take_random(subset)
   end
+
 end

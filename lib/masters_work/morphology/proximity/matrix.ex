@@ -19,7 +19,7 @@ defmodule MastersWork.Morphology.Proximity.Matrix do
             "18" -> "i"
             "19" -> "j"
             "20" -> "k"
-            _  -> el
+              _  -> el
           end
         end)
       end)
