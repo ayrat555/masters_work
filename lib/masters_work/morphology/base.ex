@@ -7,7 +7,7 @@ defmodule MastersWork.Morphology.Base do
 
   @input_path "data/input/morphology.csv"
   @input_legend_path "data/input/morphology_legend_revised.csv"
-  @output_matrix_path "data/output/morphology_matrix_hamming.csv"
+  @output_matrix_path "data/output/morphology_matrix_attr.csv"
   @expert_data_path "data/input/expert_data/*"
 
   def create_dissimilarity_matrix(distance_alg) do

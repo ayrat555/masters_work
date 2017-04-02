@@ -1,6 +1,42 @@
 defmodule MastersWork.Morphology.Proximity.Matrix do
   alias MastersWork.Morphology.Proximity.Distance
 
+  def distance_matrix(data, _columns, _legend, :attr) do
+    data =
+      data
+      |> Enum.map(fn(attr) ->
+        attr
+        |> Enum.map(fn(el) ->
+          case el do
+            "10" -> "a"
+            "11" -> "b"
+            "12" -> "c"
+            "13" -> "d"
+            "14" -> "e"
+            "15" -> "f"
+            "16" -> "g"
+            "17" -> "h"
+            "18" -> "i"
+            "19" -> "j"
+            "20" -> "k"
+            _  -> el
+          end
+        end)
+      end)
+
+    data
+    |> Enum.with_index
+    |> Enum.map(fn({attr1, ind}) ->
+      IO.inspect ind
+
+      data
+      |> Enum.map(fn(attr2) ->
+        Distance.distance(attr1, attr2, :attr)
+      end)
+    end)
+    |> normalize_matrix
+  end
+
   def distance_matrix(data, columns, legend, distance_alg) do
     data
     |> Enum.with_index

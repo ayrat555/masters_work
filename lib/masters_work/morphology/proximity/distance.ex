@@ -2,6 +2,13 @@ defmodule MastersWork.Morphology.Proximity.Distance do
   alias MastersWork.Helpers.Levenshtein
   alias MastersWork.Helpers.Hamming
 
+  def distance(attr1, attr2, :attr) do
+    attr1 = attr1 |> Enum.join("") |> to_charlist
+    attr2 = attr2 |> Enum.join("") |> to_charlist
+
+    word_distance(attr1, attr2, :levenshtein)
+  end
+
   def distance(attr1, attr2, distance_alg) do
     attr1
     |> Enum.with_index
