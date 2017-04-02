@@ -28,7 +28,8 @@ defmodule MastersWork.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:csv, "~> 1.4.2"}
+      {:csv, "~> 1.4.2"},
+      {:the_fuzz, git: "https://github.com/smashedtoatoms/the_fuzz"}
     ]
   end
 end

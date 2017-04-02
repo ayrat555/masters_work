@@ -1,12 +1,15 @@
 defmodule MastersWork.Morphology.Proximity.Distance do
-  alias MastersWork.Helpers.Levenshtein
-  alias MastersWork.Helpers.Hamming
+  alias TheFuzz.Similarity.Levenshtein
+  alias TheFuzz.Similarity.Hamming
+  alias TheFuzz.Similarity.Jaccard
+  alias TheFuzz.Similarity.DiceSorensen
+  alias TheFuzz.Similarity.Overlap
 
-  def distance(attr1, attr2, :attr) do
-    attr1 = attr1 |> Enum.join("") |> to_charlist
-    attr2 = attr2 |> Enum.join("") |> to_charlist
+  def distance(attr1, attr2, {:attr, alg}) do
+    attr1 = attr1 |> Enum.join("")
+    attr2 = attr2 |> Enum.join("")
 
-    word_distance(attr1, attr2, :levenshtein)
+    word_distance(attr1, attr2, alg)
   end
 
   def distance(attr1, attr2, distance_alg) do
@@ -53,10 +56,22 @@ defmodule MastersWork.Morphology.Proximity.Distance do
   end
 
   def word_distance(word1, word2, :levenshtein) do
-    Levenshtein.distance(word1, word2)
+    Levenshtein.compare(word1, word2)
   end
 
   def word_distance(word1, word2, :hamming) do
-    Hamming.distance(word1, word2)
+    Hamming.compare(word1, word2)
+  end
+
+  def word_distance(word1, word2, :jaccard) do
+    Jaccard.compare(word1, word2)
+  end
+
+  def word_distance(word1, word2, :dice_sorensen) do
+    DiceSorensen.compare(word1, word2)
+  end
+
+  def word_distance(word1, word2, :overlap) do
+    Overlap.compare(word1, word2)
   end
 end

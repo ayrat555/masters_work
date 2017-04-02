@@ -1,7 +1,7 @@
 defmodule MastersWork.Morphology.Proximity.Matrix do
   alias MastersWork.Morphology.Proximity.Distance
 
-  def distance_matrix(data, _columns, _legend, :attr) do
+  def distance_matrix(data, _columns, _legend, {:attr, alg}) do
     data =
       data
       |> Enum.map(fn(attr) ->
@@ -31,9 +31,10 @@ defmodule MastersWork.Morphology.Proximity.Matrix do
 
       data
       |> Enum.map(fn(attr2) ->
-        Distance.distance(attr1, attr2, :attr)
+        Distance.distance(attr1, attr2, {:attr, alg})
       end)
     end)
+    |> IO.inspect
     |> normalize_matrix
   end
 
