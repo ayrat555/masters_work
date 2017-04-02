@@ -1,4 +1,4 @@
-defmodule MastersWork.Proximity.Measure do
+defmodule MastersWork.Phonetics.Measure do
   def proximity(%{a: a, b: b, c: c, d: d, f: f}, measure: measure) when measure == 1 do
     (a + d) / (a + b + c + d + f)
   end

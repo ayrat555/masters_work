@@ -1,6 +1,6 @@
-defmodule MastersWork.Proximity.Matrix do
-  alias MastersWork.Proximity.Measure
-  alias MastersWork.Proximity.VectorParams
+defmodule MastersWork.Phonetics.Matrix do
+  alias MastersWork.Phonetics.Measure
+  alias MastersWork.Phonetics.VectorParams
 
   def matrix(dataset, measure: measure) do
     dataset |> Enum.map(&vector(dataset, &1, measure))
@@ -10,7 +10,7 @@ defmodule MastersWork.Proximity.Matrix do
     dataset |> Enum.map(&measure_vector_proximity(community_values, &1, measure))
   end
 
-  defp measure_vector_proximity(vector1, vector2, measure) when vector1 == vector2 do
+  defp measure_vector_proximity(vector1, vector2, _measure) when vector1 == vector2 do
     0
   end
 

@@ -1,9 +1,9 @@
-defmodule MastersWork.Proximity.VectorParams do
+defmodule MastersWork.Phonetics.VectorParams do
   def params(community_values1, community_values2) do
     result = %{a: 0, b: 0, c: 0, d: 0, f: 0}
     _params(community_values1, community_values2, result)
   end
-  
+
   defp _params([head1 | []], [head2 | []], %{a: a, d: d} = result) when head1 == head2 do
     case head1 do
       0 -> %{result | a: a + 1}

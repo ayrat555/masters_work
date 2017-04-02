@@ -1,10 +1,9 @@
 defmodule MastersWork.Morphology.Base do
   alias MastersWork.Preprocessor
-  alias MastersWork.Helpers.Levenshtein
-  alias MastersWork.Helpers.Hamming
   alias MastersWork.Postprocessor
   alias MastersWork.Cluster.GapStat
   alias MastersWork.Cluster.Clusterisation
+  alias MastersWork.Morphology.Proximity.Matrix
 
   @input_path "data/input/morphology.csv"
   @input_legend_path "data/input/morphology_legend_revised.csv"
@@ -14,8 +13,7 @@ defmodule MastersWork.Morphology.Base do
   def create_dissimilarity_matrix(distance_alg) do
     {values, columns, legend, _} = parse_initial_data
 
-    distance_matrix(values, columns, legend, distance_alg)
-    |> normalize_matrix
+    Matrix.distance_matrix(values, columns, legend, distance_alg)
     |> Postprocessor.write(@output_matrix_path)
   end
 
@@ -72,64 +70,6 @@ defmodule MastersWork.Morphology.Base do
     end
   end
 
-  def distance_matrix(data, columns, legend, distance_alg) do
-    data
-    |> Enum.with_index
-    |> Enum.map(fn({val1, ind}) ->
-      IO.inspect ind
-      atr1 = attributes(val1, columns, legend)
-      data
-      |> Enum.map(fn(val2) ->
-        atr2 = attributes(val2, columns, legend)
-        dist = distance(atr1, atr2, distance_alg)
-        Enum.sum(dist) / Enum.count(atr2)
-      end)
-    end)
-  end
-
-  def attributes(values, columns, legend) do
-    values
-    |> Enum.with_index
-    |> Enum.map(fn({el, ind}) ->
-      column = columns |> Enum.at(ind)
-      legend |> Enum.find_value(fn({col, val, attributes}) -> if (col == column) && (val == el), do: attributes end)
-    end)
-    |> Enum.reject(fn(el) -> is_nil(el) end)
-  end
-
-  def distance(attr1, attr2, distance_alg) do
-    attr1
-    |> Enum.with_index
-    |> Enum.map(fn({el, ind}) ->
-      el1 =attr2 |> Enum.at(ind)
-      attribute_distance(el, el1, distance_alg)
-    end)
-  end
-
-  def normalize_matrix(matrix) do
-    min =
-    matrix
-    |> Enum.map(fn(row) ->
-      row |> Enum.min
-    end)
-    |> Enum.min
-
-    max =
-    matrix
-    |> Enum.map(fn(row) ->
-      row |> Enum.max
-    end)
-    |> Enum.max
-
-    matrix
-    |> Enum.map(fn(row) ->
-      row
-      |> Enum.map(fn(el) ->
-        (el - min)/(max - min)
-      end)
-    end)
-  end
-
   def expert_data_result do
     {communities, _, _} = Preprocessor.read(@input_path)
 
@@ -150,43 +90,5 @@ defmodule MastersWork.Morphology.Base do
     |> Enum.map(fn(cluster) ->
       cluster + 1
     end)
-  end
-
-  def attribute_distance(val, val, _) do
-    0
-  end
-
-  def attribute_distance(["nil"], ["nil"], _) do
-    0
-  end
-
-  def attribute_distance(attribute1, ["nil"], _) do
-    attribute1 |> Enum.count
-  end
-
-  def attribute_distance(["nil"], attribute2, _) do
-    attribute2 |> Enum.count
-  end
-
-  def attribute_distance(attribute1, attribute2, distance_alg) do
-    distances =
-      attribute1
-      |> Enum.map(fn(word1) ->
-        word1 = word1 |> to_charlist
-        attribute2
-        |> Enum.map(fn(word2) ->
-          word2 = word2 |> to_charlist
-          case distance_alg do
-            :levenshtein ->
-              Levenshtein.distance(word1, word2)
-            :hamming ->
-              Hamming.distance(word1, word2)
-           end
-        end)
-        |> List.delete(0)
-      end)
-      |> List.flatten
-
-     if Enum.empty?(distances), do: 0, else: Enum.min(distances)
   end
 end
