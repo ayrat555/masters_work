@@ -22,7 +22,7 @@ defmodule MastersWork.Morphology.Base do
       @output_matrix_path
       |> String.split("/")
       |> List.last
-    optimal_number_of_clusters = GapStat.calculate(file_name, number_of_clusters) |> IO.inspect
+    optimal_number_of_clusters = GapStat.calculate(file_name, number_of_clusters)
 
     Clusterisation.calculate_clusters(file_name, optimal_number_of_clusters)
   end
