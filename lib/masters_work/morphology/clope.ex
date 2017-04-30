@@ -29,11 +29,22 @@ defmodule MastersWork.Morphology.Clope do
       cluster
       |> Enum.each(fn(community) ->
         IO.binwrite(result_file, community)
-        IO.binwrite(result_file, "\n")
+        IO.binwrite(result_file, ", ")
       end)
+      IO.binwrite(result_file, "\n")
     end)
 
     File.close result_file
+  end
+
+  def sets_to_compare(repulsion \\ 2) do
+    clope_clusters = clusterize(repulsion)
+    expert_clusters = Base.expert_data_dialects
+
+    clope_cluster_set = clope_clusters |> Enum.map(&MapSet.new/1)
+    expert_cluster_set = expert_clusters |> Enum.map(&MapSet.new/1)
+
+    {clope_cluster_set, expert_cluster_set}
   end
 
   defp prepare_data do

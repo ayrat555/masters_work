@@ -9,6 +9,7 @@ defmodule MastersWork.Morphology.Base do
   @input_legend_path "data/input/morphology_legend_revised.csv"
   @output_matrix_path "data/output/morphology_matrix_attr.csv"
   @expert_data_path "data/input/expert_data/*"
+  @expert_sub_data_path "data/input/expert_data/sub_dialects/*"
 
   def create_dissimilarity_matrix(distance_alg) do
     {values, columns, legend, _} = parse_initial_data
@@ -95,10 +96,18 @@ defmodule MastersWork.Morphology.Base do
   end
 
   def expert_data_dialects do
+    expert_data_classification(@expert_data_path)
+  end
+
+  def expert_data_subdialects do
+    expert_data_classification(@expert_sub_data_path)
+  end
+
+  defp expert_data_classification(path) do
     {communities, _, _} = Preprocessor.read(@input_path)
 
     expert_data =
-      Path.wildcard(@expert_data_path)
+      Path.wildcard(path)
       |> Enum.map(fn(path) -> path |> File.read! end)
 
     result = communities
@@ -106,13 +115,30 @@ defmodule MastersWork.Morphology.Base do
       dialect =
         expert_data
         |> Enum.find_index(fn(data) ->
-          case :binary.match(data, community_name)  do
-            {_, _} -> true
-            :nomatch -> false
-          end
-        end)
+        case :binary.match(data, community_name)  do
+          {_, _} -> true
+          :nomatch -> false
+        end
+      end)
 
-      {community_name, dialect + 1}
+      {community_name, dialect}
+    end)
+
+    dialect_count = Enum.count expert_data
+    clusters =
+      1..dialect_count
+      |> Enum.map(fn(_) -> [] end)
+
+    result
+    |> Enum.reduce(clusters, fn({community, num}, temp_clusters) ->
+      cluster =
+        temp_clusters
+        |> Enum.at(num)
+
+      cluster = [community | cluster]
+
+
+      temp_clusters |> List.replace_at(num, cluster)
     end)
   end
 end
