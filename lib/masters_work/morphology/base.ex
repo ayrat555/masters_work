@@ -94,4 +94,25 @@ defmodule MastersWork.Morphology.Base do
     if subset |> is_nil, do: result, else: result |> Enum.take_random(subset)
   end
 
+  def expert_data_dialects do
+    {communities, _, _} = Preprocessor.read(@input_path)
+
+    expert_data =
+      Path.wildcard(@expert_data_path)
+      |> Enum.map(fn(path) -> path |> File.read! end)
+
+    result = communities
+    |> Enum.map(fn({_, community_name}) ->
+      dialect =
+        expert_data
+        |> Enum.find_index(fn(data) ->
+          case :binary.match(data, community_name)  do
+            {_, _} -> true
+            :nomatch -> false
+          end
+        end)
+
+      {community_name, dialect + 1}
+    end)
+  end
 end

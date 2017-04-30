@@ -1,5 +1,7 @@
 defmodule MastersWork.Morphology.Clope do
   alias MastersWork.Morphology.Base
+  @result_folder "./data/output/clope_clusters"
+  @result_file_name "./data/output/clope_clusters/cluster.txt"
 
   def clusterize(repulsion) do
     data_for_clope = prepare_data
@@ -11,6 +13,27 @@ defmodule MastersWork.Morphology.Clope do
         community
       end)
     end)
+  end
+
+  def write_clusters(repulsion) do
+    clusters = clusterize(repulsion)
+
+    File.mkdir(@result_folder)
+    File.touch(@result_file_name)
+    {:ok, result_file} = File.open(@result_file_name, [:write])
+
+    clusters
+    |> Enum.each(fn(cluster) ->
+      IO.binwrite(result_file, "\n")
+
+      cluster
+      |> Enum.each(fn(community) ->
+        IO.binwrite(result_file, community)
+        IO.binwrite(result_file, "\n")
+      end)
+    end)
+
+    File.close result_file
   end
 
   defp prepare_data do
