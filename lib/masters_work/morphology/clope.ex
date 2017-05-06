@@ -1,5 +1,6 @@
 defmodule MastersWork.Morphology.Clope do
   alias MastersWork.Morphology.Base
+  alias MastersWork.Preprocessor
   @result_folder "./data/output/clope_clusters"
   @result_file_name "./data/output/clope_clusters/cluster.txt"
 
@@ -48,7 +49,18 @@ defmodule MastersWork.Morphology.Clope do
   end
 
   defp prepare_data do
-    {values, _columns, _legend, communities} = Base.parse_initial_data
+    {communities, _, mor_values} = Preprocessor.read("data/input/morphology.csv")
+    {p_communities, _, pho_values} = Preprocessor.read("data/input/phonetics_consonantal.csv")
+    {p1_communities, _, pho1_values} = Preprocessor.read("data/input/phonetics_vowels.csv")
+
+    ^communities = ^p_communities = p1_communities
+
+    values =
+      mor_values
+      |> Enum.with_index
+      |> Enum.map(fn({v, index}) ->
+        v ++ Enum.at(pho_values, index) ++ Enum.at(pho1_values, index)
+     end)
 
     values
     |> Enum.with_index
