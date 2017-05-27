@@ -29,7 +29,8 @@ defmodule MastersWork.Mixfile do
   defp deps do
     [
       {:csv, "~> 1.4.2"},
-      {:clope, "~> 0.1.0"},
+      {:clope, "~> 0.1.2"},
+      {:rock, "~> 0.1.0"},
       {:the_fuzz, git: "https://github.com/smashedtoatoms/the_fuzz"}
     ]
   end
