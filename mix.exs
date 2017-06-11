@@ -31,6 +31,7 @@ defmodule MastersWork.Mixfile do
       {:csv, "~> 1.4.2"},
       {:clope, "~> 0.1.2"},
       {:rock, "~> 0.1.0"},
+      {:apex, "~>1.0.0"},
       {:the_fuzz, git: "https://github.com/smashedtoatoms/the_fuzz"}
     ]
   end
